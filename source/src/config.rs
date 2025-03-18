@@ -95,17 +95,22 @@ pub enum FilesystemMode {
 #[derive(Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case", deny_unknown_fields)]
 pub struct Config {
-    #[serde(rename = "$schema", skip_serializing)]
+    #[serde(rename = "$schema", skip_serializing, default)]
     pub _schema: Option<String>,
     /// Override the default UUID.
+    #[serde(default)]
     pub uuid: Option<String>,
     /// How encryption should be handled.  Defaults to unencrypted.
+    #[serde(default)]
     pub encryption: Option<EncryptionMode>,
-    /// Filesystem to use, how to turn disks into filesystems.
+    /// Filesystem to use, how to turn disks into filesystems. Defaults to ext4.
+    #[serde(default)]
     pub fs: Option<FilesystemMode>,
     /// The mount point of the volume.  Defaults to `/mnt/persistent`.
+    #[serde(default)]
     pub mountpoint: Option<PathBuf>,
     /// Ensure these directories (and parents) relative to the mountdir once it's
     /// mounted.
+    #[serde(default)]
     pub ensure_dirs: Option<Vec<PathBuf>>,
 }

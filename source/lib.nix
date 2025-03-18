@@ -5,9 +5,9 @@
   # and removed.
   encryptKeyfile = { name, keyPath, publicKeyPaths }:
     let
-      keyLines = lib.concatStringsSep " " (map (key: "--recipient-file ${key}") publicKeyPaths);
+      keyLines = lib.concatStringsSep " " (map (key: "--for-file ${key}") publicKeyPaths);
       encryptedPath = derivation {
-        name = "volumesetup-key";
+        name = "${name}-volumesetup-key";
         system = builtins.currentSystem;
         builder = "${pkgs.bash}/bin/bash";
         args = [
@@ -16,7 +16,7 @@
             ${pkgs.sequoia-sq}/bin/sq encrypt \
                 ${keyLines} \
                 --output $out \
-                ${volumesetup_key_plaintext_path} \
+                ${keyPath} \
                 ;
           '')
         ];
@@ -37,7 +37,7 @@
           (pkgs.writeText "${name}-decrypt-encrypt-script" ''
             set -xeu
             ${pkgs.sequoia-sq}/bin/sq encrypt \
-              --with-password-file ${volumesetup_key_plaintext_path} \
+              --with-password-file ${keyPath} \
               --output $out \
               ${decrypt} \
               ;
