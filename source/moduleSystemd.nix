@@ -3,7 +3,7 @@
   config = {
     systemd.services = {
       volumesetup = {
-        wantedBy = [ "local-fs.target" ];
+        wantedBy = [ "basic.target" ];
         after = [
           "local-fs.target"
           # For pcscd
