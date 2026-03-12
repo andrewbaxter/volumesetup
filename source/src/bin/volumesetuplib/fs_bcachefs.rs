@@ -34,7 +34,7 @@ use {
 fn mount(log: &Log, uuid: &str, mount_path: &PathBuf, key: Option<&String>) -> Result<(), loga::Error> {
     let mut c = Command::new("bcachefs");
     c.arg("mount");
-    c.arg("-o").arg("degraded,fsck,fix_errors");
+    c.arg("-o").arg("degraded");
     c.arg(format!("UUID={}", uuid)).arg(mount_path);
     if let Some(key) = key {
         c.arg("--key_location=stdin");
@@ -77,10 +77,8 @@ pub(crate) fn main1(
     mount_path: &PathBuf,
 ) -> Result<(), loga::Error> {
     let uuid = config.uuid.as_ref().map(|x| x.as_str()).unwrap_or(OUTER_UUID);
-    let mut c = Command::new("bcachefs");
-    c.arg("show-super").arg(format!("/dev/disk/by-uuid/{}", uuid));
-    log.log(loga::DEBUG, format!("Running {:?}", c));
-    if let Ok(_) = c.simple().run_stdout() {
+    let uuid_path = PathBuf::from(format!("/dev/disk/by-uuid/{}", uuid));
+    if uuid_path.exists() {
         log.log(loga::INFO, format!("Filesystem found with UUID {}, mounting", uuid));
 
         // # Mount - can't add/remove until that's done
@@ -198,14 +196,10 @@ pub(crate) fn main1(
         let key;
         {
             let mut c = Command::new("bcachefs");
-            c
-                .arg("format")
-                .arg(format!("--uuid={}", uuid))
-                .arg("--force")
-                .arg("--replicas=2")
-                .arg("--metadata_replicas_required=2")
-                .arg("--data_replicas_required=2")
-                .arg("--compression=zstd");
+            c.arg("format").arg(format!("--uuid={}", uuid)).arg("--force").arg("--replicas=2")
+                // https://github.com/koverstreet/bcachefs-tools/issues/530
+                //. .arg("--metadata_replicas_required=2")
+                .arg("--data_replicas_required=2").arg("--compression=zstd");
             match config.encryption.as_ref().unwrap_or(&crate::config::EncryptionMode::None {}) {
                 crate::config::EncryptionMode::None {} => {
                     key = None;

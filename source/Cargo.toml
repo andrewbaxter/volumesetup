@@ -32,3 +32,6 @@ rand = "0.8"
 openpgp-card = "0.5"
 path-absolutize = "3"
 sequoia-openpgp = "1"
+
+[lints.clippy]
+all = "allow"

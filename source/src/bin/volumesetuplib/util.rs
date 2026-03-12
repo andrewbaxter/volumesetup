@@ -34,6 +34,7 @@ impl<'a> SimpleCommand<'a> {
         let log = Log::new().fork(ea!(command = self.0.dbg_str()));
         self.0.stdout(std::process::Stdio::piped());
         self.0.stderr(std::process::Stdio::piped());
+        self.0.stdin(std::process::Stdio::null());
         let o = self.0.output().stack_context(&log, "Failed to start child process")?;
         if !o.status.success() {
             return Err(
@@ -52,8 +53,10 @@ impl<'a> SimpleCommand<'a> {
         self.0.stderr(std::process::Stdio::piped());
         self.0.stdin(std::process::Stdio::piped());
         let mut child = self.0.spawn().stack_context(&log, "Failed to start child process")?;
-        let stdin = child.stdin.as_mut().unwrap();
+        let mut stdin = child.stdin.take().unwrap();
         stdin.write_all(data).stack_context(&log, "Error writing to child process stdin")?;
+        stdin.flush().stack_context(&log, "Error writing (flush) data to child process stdin")?;
+        drop(stdin);
         let output = child.wait_with_output().stack_context(&log, "Failed to wait for child process to exit")?;
         if !output.status.success() {
             return Err(
@@ -70,6 +73,7 @@ impl<'a> SimpleCommand<'a> {
         let log = Log::new().fork(ea!(command = self.0.dbg_str()));
         self.0.stdout(std::process::Stdio::piped());
         self.0.stderr(std::process::Stdio::piped());
+        self.0.stdin(std::process::Stdio::null());
         let child = self.0.spawn().stack_context(&log, "Failed to start child process")?;
         let output = child.wait_with_output().stack_context(&log, "Failed to wait for child process to exit")?;
         if !output.status.success() {
