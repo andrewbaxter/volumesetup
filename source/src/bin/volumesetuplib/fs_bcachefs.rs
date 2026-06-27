@@ -196,10 +196,7 @@ pub(crate) fn main1(
         let key;
         {
             let mut c = Command::new("bcachefs");
-            c.arg("format").arg(format!("--uuid={}", uuid)).arg("--force").arg("--replicas=2")
-                // https://github.com/koverstreet/bcachefs-tools/issues/530
-                //. .arg("--metadata_replicas_required=2")
-                .arg("--data_replicas_required=2").arg("--compression=zstd");
+            c.arg("format").arg(format!("--uuid={}", uuid)).arg("--force").arg("--replicas=2");
             match config.encryption.as_ref().unwrap_or(&crate::config::EncryptionMode::None {}) {
                 crate::config::EncryptionMode::None {} => {
                     key = None;
