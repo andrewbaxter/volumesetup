@@ -88,6 +88,8 @@ pub enum EncryptionMode {
 pub enum FilesystemMode {
     /// The largest unused disk will be used and formatted ext4.
     Ext4,
+    /// The largest unused disk will be used and formatted xfs.
+    Xfs,
     /// All unused disks will be added to the pool
     Bcachefs,
 }

@@ -34,6 +34,7 @@
         path = lib.makeBinPath [
           pkgs.systemd
           pkgs.e2fsprogs
+          pkgs.xfsprogs
           pkgs.cryptsetup
           pkgs.util-linux
           pkgs.bcachefs-tools

@@ -55,8 +55,40 @@ use {
     },
 };
 
+/// Filesystems that are created on a single disk (the largest unused one).
+#[derive(Clone, Copy)]
+pub(crate) enum SingleFs {
+    Ext4,
+    Xfs,
+}
+
+impl SingleFs {
+    fn name(self) -> &'static str {
+        match self {
+            SingleFs::Ext4 => "ext4",
+            SingleFs::Xfs => "xfs",
+        }
+    }
+
+    fn mkfs_command(self, dev_path: &Path, uuid: &str) -> Command {
+        match self {
+            SingleFs::Ext4 => {
+                let mut c = Command::new("mkfs.ext4");
+                c.arg("-F").arg(dev_path).arg("-U").arg(uuid);
+                c
+            },
+            SingleFs::Xfs => {
+                let mut c = Command::new("mkfs.xfs");
+                c.arg("-f").arg("-m").arg(format!("uuid={}", uuid)).arg(dev_path);
+                c
+            },
+        }
+    }
+}
+
 pub(crate) fn main(
     log: &Log,
+    fs: SingleFs,
     blocks: Vec<LsblkDevice>,
     config: &Config,
     mount_path: &PathBuf,
@@ -67,12 +99,9 @@ pub(crate) fn main(
 
     // Mounting - helper methods
     let format = |dev_path: &Path, uuid: &str| -> Result<PathBuf, loga::Error> {
-        log.log_with(loga::INFO, "Creating filesystem", ea!(dev = dev_path.dbg_str()));
-        Command::new("mkfs.ext4")
-            .arg("-F")
-            .arg(dev_path)
-            .arg("-U")
-            .arg(uuid)
+        log.log_with(loga::INFO, "Creating filesystem", ea!(dev = dev_path.dbg_str(), fs = fs.name()));
+        fs
+            .mkfs_command(dev_path, uuid)
             .simple()
             .run()
             .context("Error formatting persistent volume")?;
@@ -85,8 +114,8 @@ pub(crate) fn main(
         }
         return Err(
             loga::err_with(
-                "Even after formatting disk ext4, it never appeared in `by-uuid`. Try wiping the disk to remove misleading headers or doing a health check.",
-                ea!(dev = dev_path.to_string_lossy(), path = fs_dev_path.to_string_lossy()),
+                "Even after formatting disk, it never appeared in `by-uuid`. Try wiping the disk to remove misleading headers or doing a health check.",
+                ea!(dev = dev_path.to_string_lossy(), path = fs_dev_path.to_string_lossy(), fs = fs.name()),
             ),
         );
     };

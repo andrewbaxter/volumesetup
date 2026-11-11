@@ -80,7 +80,20 @@ fn main1() -> Result<(), loga::Error> {
                 }
             }
             match config.fs.as_ref().unwrap_or(&config::FilesystemMode::Ext4 {}) {
-                config::FilesystemMode::Ext4 {} => fs_ext4::main(&log, blocks, &config, &mount_path)?,
+                config::FilesystemMode::Ext4 {} => fs_single::main(
+                    &log,
+                    fs_single::SingleFs::Ext4,
+                    blocks,
+                    &config,
+                    &mount_path,
+                )?,
+                config::FilesystemMode::Xfs {} => fs_single::main(
+                    &log,
+                    fs_single::SingleFs::Xfs,
+                    blocks,
+                    &config,
+                    &mount_path,
+                )?,
                 config::FilesystemMode::Bcachefs {} => fs_bcachefs::main(&log, blocks, &config, &mount_path)?,
             }
 

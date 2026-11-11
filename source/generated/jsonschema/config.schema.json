@@ -23,6 +23,7 @@
     },
     "ensure_dirs": {
       "description": "Ensure these directories (and parents) relative to the mountdir once it's mounted.",
+      "default": null,
       "type": [
         "array",
         "null"
@@ -32,7 +33,7 @@
       }
     },
     "fs": {
-      "description": "Filesystem to use, how to turn disks into filesystems.",
+      "description": "Filesystem to use, how to turn disks into filesystems. Defaults to ext4.",
       "anyOf": [
         {
           "$ref": "#/definitions/FilesystemMode"
@@ -44,6 +45,7 @@
     },
     "mountpoint": {
       "description": "The mount point of the volume.  Defaults to `/mnt/persistent`.",
+      "default": null,
       "type": [
         "string",
         "null"
@@ -51,6 +53,7 @@
     },
     "uuid": {
       "description": "Override the default UUID.",
+      "default": null,
       "type": [
         "string",
         "null"
@@ -120,6 +123,13 @@
           "type": "string",
           "enum": [
             "ext4"
+          ]
+        },
+        {
+          "description": "The largest unused disk will be used and formatted xfs.",
+          "type": "string",
+          "enum": [
+            "xfs"
           ]
         },
         {

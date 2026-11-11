@@ -8,6 +8,8 @@ It has supports filesystems:
 
 - `ext4` - The largest disk is selected and formatted
 
+- `xfs` - The largest disk is selected and formatted
+
 - `bcachefs` - All unused disks are added, if new disks are found at boot they will be added, and missing/failed disks will be removed
 
 And three encryption modes:
